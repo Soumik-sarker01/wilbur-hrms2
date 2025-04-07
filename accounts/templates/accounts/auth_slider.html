@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login/Signup Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #f8f9fa, #e0e0e0);
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Centered, responsive container with an accent border at the top */
+    .auth-container {
+      width: 90%;
+      max-width: 500px;
+      margin: 60px auto;
+      position: relative;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      background: #fff;
+      overflow: hidden; /* hides the off-screen form when sliding */
+      transition: background-color 0.5s, border-top 0.5s;
+      border-top: 5px solid #007bff; /* Default (login) accent color */
+    }
+    
+    /* Switch to a green accent color when "signup" is active */
+    .auth-container.s--signup {
+      border-top: 5px solid #28a745;
+    }
+    
+    /* Tab headers */
+    .tab-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #ddd;
+      background-color: #f8f9fa;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      cursor: pointer;
+      padding: 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      transition: background 0.3s, color 0.3s;
+    }
+    .tab:hover {
+      background-color: #ececec;
+    }
+    /* Active tab color logic:
+       - Blue for login (default)
+       - Green for signup
+    */
+    .auth-container:not(.s--signup) .tab.active {
+      color: #007bff;
+      border-bottom: 2px solid #007bff;
+    }
+    .auth-container.s--signup .tab.active {
+      color: #28a745;
+      border-bottom: 2px solid #28a745;
+    }
+    
+    /* Message area below the tabs */
+    .toggle-message {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 15px;
+      color: #555;
+      background-color: #f8f9fa;
+    }
+    
+    /*
+      The wrapper holds both forms side-by-side.
+      Total width is 200% (each form 50% of the container),
+      and we slide between them with translateX().
+    */
+    .form-wrapper {
+      display: flex;
+      width: 200%;
+      transition: transform 0.6s ease;
+    }
+    
+    .form-box {
+      width: 50%;
+      padding: 40px 30px;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    .form-box h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 28px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    input {
+      width: 85%;
+      margin: 12px auto;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      display: block;
+    }
+    .error-message {
+      color: red;
+      font-size: 12px;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    .submit {
+      width: 85%;
+      height: 45px;
+      margin: 30px auto;
+      border-radius: 25px;
+      background: #d4af7a;
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      display: block;
+      transition: background 0.3s;
+    }
+    .submit:hover {
+      background: #c39a63;
+    }
+    
+    /* Default: Show login form (first half) */
+    .form-wrapper {
+      transform: translateX(0%);
+    }
+    /* When toggling signup mode, slide left by 50% to show the signup form */
+    .auth-container.s--signup .form-wrapper {
+      transform: translateX(-50%);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .tab {
+        font-size: 16px;
+        padding: 15px 0;
+      }
+      .form-box {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="auth-container" id="authContainer">
+  <!-- Tab headers (order now: Login then Signup) -->
+  <div class="tab-container">
+    <div class="tab active" id="tabLogin">Login</div>
+    <div class="tab" id="tabSignup">Signup</div>
+  </div>
+
+
+
+  <div class="form-wrapper">
+    <!-- Login Form (first half) -->
+    <form method="post" action="{% url 'login' %}" class="form-box" id="loginForm">
+      {% csrf_token %}
+      <h2>Login</h2>
+      <div id="loginFormContainer">
+        {% include "accounts/login_form_partial.html" %}
+      </div>
+    </form>
+    <!-- Signup Form (second half) -->
+    <form method="post" action="{% url 'signup' %}" class="form-box" id="signupForm">
+      {% csrf_token %}
+      <h2>Signup</h2>
+      <div id="signupFormContainer">
+        {% include "accounts/signup_form_partial.html" %}
+      </div>
+    </form>
+  </div>
+    <!-- Message area that changes based on which form is visible -->
+    <div class="toggle-message">
+      <p id="toggleText">Don't have an account? Please sign up!</p>
+    </div>
+</div>
+
+<script>
+  // Grab references
+  const container = document.getElementById('authContainer');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const toggleText = document.getElementById('toggleText');
+
+  // Show login form by default
+  function showLogin() {
+    container.classList.remove('s--signup');
+    tabLogin.classList.add('active');
+    tabSignup.classList.remove('active');
+    toggleText.innerText = "Don't have an account? Please sign up!";
+  }
+
+  // Show signup form
+  function showSignup() {
+    container.classList.add('s--signup');
+    tabSignup.classList.add('active');
+    tabLogin.classList.remove('active');
+    toggleText.innerText = "Already have an account? Please sign in!";
+  }
+
+  // Event listeners for tabs
+  tabLogin.addEventListener('click', showLogin);
+  tabSignup.addEventListener('click', showSignup);
+
+  // AJAX for login form
+  document.addEventListener("DOMContentLoaded", function() {
+    // Ensure default state is "login" visible
+    showLogin();
+
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) {
+      loginForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(loginForm);
+        fetch("{% url 'login' %}", {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: formData,
+          credentials: "same-origin"
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            window.location.href = data.redirect_url;
+          } else {
+            document.getElementById("loginFormContainer").innerHTML = data.form_html;
+          }
+        })
+        .catch(error => {
+          console.error("AJAX error:", error);
+        });
+      });
+    }
+
+    // AJAX for signup form
+    const signupForm = document.getElementById("signupForm");
+    if (signupForm) {
+      signupForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(signupForm);
+        fetch("{% url 'signup' %}", {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: formData,
+          credentials: "same-origin"
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            window.location.href = data.redirect_url;
+          } else {
+            document.getElementById("signupFormContainer").innerHTML = data.form_html;
+          }
+        })
+        .catch(error => {
+          console.error("AJAX error:", error);
+        });
+      });
+    }
+  });
+</script>
+</body>
+</html>

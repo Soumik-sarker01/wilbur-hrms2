@@ -1,0 +1,25 @@
+<div class="form-group">
+  <input type="text" name="username" placeholder="Username" required>
+  {% if signup_form.username.errors %}
+    <span class="error-message">{{ signup_form.username.errors|striptags }}</span>
+  {% endif %}
+</div>
+<div class="form-group">
+  <input type="email" name="email" placeholder="Email" required>
+  {% if signup_form.email.errors %}
+    <span class="error-message">{{ signup_form.email.errors|striptags }}</span>
+  {% endif %}
+</div>
+<div class="form-group">
+  <input type="password" name="password1" placeholder="Password" required>
+  {% if signup_form.password1.errors %}
+    <span class="error-message">{{ signup_form.password1.errors|striptags }}</span>
+  {% endif %}
+</div>
+<div class="form-group">
+  <input type="password" name="password2" placeholder="Confirm Password" required>
+  {% if signup_form.password2.errors %}
+    <span class="error-message">{{ signup_form.password2.errors|striptags }}</span>
+  {% endif %}
+</div>
+<button type="submit" class="submit">Sign Up</button>
